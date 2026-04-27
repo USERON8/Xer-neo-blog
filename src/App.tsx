@@ -1,6 +1,5 @@
 import {
   BookOpen,
-  Boxes,
   CalendarDays,
   ChevronRight,
   Code2,
@@ -28,16 +27,20 @@ import { useMemo, useState } from 'react';
 
 type Page = 'home' | 'articles' | 'article' | 'categories' | 'tags' | 'projects' | 'about';
 type ThemeMode = 'light' | 'dark';
+type ArticleTheme = 'network' | 'algorithm' | 'memory' | 'code';
 
 type Article = {
   id: string;
   title: string;
+  project: 'GinChat' | 'Cloud Shop';
   category: string;
   date: string;
   views: string;
   description: string;
   tags: string[];
-  theme: 'network' | 'algorithm' | 'memory' | 'code';
+  theme: ArticleTheme;
+  sections: { id: string; title: string; body: string }[];
+  code?: string;
 };
 
 type Category = {
@@ -65,72 +68,251 @@ type Project = {
 
 const articles: Article[] = [
   {
-    id: 'tcp-handshake',
-    title: '深入理解 TCP 三次握手与四次挥手',
-    category: '计算机网络',
-    date: '2026-04-18',
+    id: 'ginchat-architecture',
+    title: 'GinChat 单体 IM 服务架构拆解',
+    project: 'GinChat',
+    category: '实时通讯',
+    date: '2026-04-24',
     views: '1.2k',
-    description: '梳理连接建立、连接释放、状态流转、报文顺序和面试高频追问。',
-    tags: ['TCP/IP', '网络协议', '面试题'],
-    theme: 'network',
-  },
-  {
-    id: 'binary-tree',
-    title: '二叉树遍历的通用解法',
-    category: '数据结构',
-    date: '2026-04-16',
-    views: '856',
-    description: '对比前序、中序、后序、层序遍历，并总结递归与迭代模板。',
-    tags: ['算法', '二叉树', '栈'],
-    theme: 'algorithm',
-  },
-  {
-    id: 'memory-paging',
-    title: '操作系统内存管理：分页机制',
-    category: '操作系统',
-    date: '2026-04-14',
-    views: '1.1k',
-    description: '解释页表、虚拟地址、物理页框、TLB 和缺页中断流程。',
-    tags: ['操作系统', '内存管理', '分页'],
-    theme: 'memory',
-  },
-  {
-    id: 'closure',
-    title: '闭包作用域与运行时行为',
-    category: '编程语言',
-    date: '2026-04-12',
-    views: '980',
-    description: '从执行上下文理解词法作用域、变量捕获和闭包生命周期。',
-    tags: ['JavaScript', '运行时', '作用域'],
+    description: '围绕 Gin、GORM、PostgreSQL、Redis 与 WebSocket，梳理 GinChat 的模块边界和请求链路。',
+    tags: ['GinChat', 'Go', 'Gin', 'GORM', 'PostgreSQL', 'WebSocket'],
     theme: 'code',
+    sections: [
+      {
+        id: 'boundary',
+        title: '模块边界',
+        body: 'GinChat 按 handler、model、ws、middleware、pkg、router 拆分职责。handler 负责 HTTP 入口，ws 负责连接管理和消息转发，pkg 封装配置、数据库、JWT、日志、Redis 与统一响应。',
+      },
+      {
+        id: 'data',
+        title: '数据与缓存',
+        body: '项目使用 PostgreSQL + GORM 管理用户、好友、群组和消息数据；Redis 承担用户缓存、在线状态、消息去重和 refresh token 存储。',
+      },
+      {
+        id: 'value',
+        title: '项目价值',
+        body: '这个项目适合展示 Go Web 后端、实时通讯、Redis 状态管理和基础 IM 业务建模能力。',
+      },
+    ],
+    code: `router.GET("/api/ws", handler.WebSocket)
+manager.Register(client)
+client.ReadPump()
+client.WritePump()`,
+  },
+  {
+    id: 'ginchat-websocket-flow',
+    title: 'GinChat WebSocket 消息链路与 Worker Pool',
+    project: 'GinChat',
+    category: '实时通讯',
+    date: '2026-04-23',
+    views: '980',
+    description: '从连接、ReadPump、消息去重、异步写库到在线转发，复盘 GinChat 的实时消息流。',
+    tags: ['GinChat', 'WebSocket', 'Redis', 'Worker Pool', '消息去重'],
+    theme: 'network',
+    sections: [
+      {
+        id: 'connect',
+        title: '连接建立',
+        body: '客户端通过 ws://localhost:8080/api/ws?token=<access_token> 建立连接，服务端校验 token 后把连接注册到在线用户管理器。',
+      },
+      {
+        id: 'dispatch',
+        title: '消息分发',
+        body: 'ReadPump 接收 JSON 消息后先用 Redis SETNX 做 60 秒内的 msgId 去重，再交给 Worker Pool 异步写库，最后由 Manager 找到目标在线连接并通过 WritePump 推送。',
+      },
+      {
+        id: 'offline',
+        title: '离线处理',
+        body: '目标用户不在线时消息仍然落库，用户上线后通过历史消息接口按游标分页拉取，避免实时通道和历史补偿耦合。',
+      },
+    ],
+  },
+  {
+    id: 'ginchat-auth-cache',
+    title: 'GinChat JWT 认证、Refresh Token 与 Redis 状态管理',
+    project: 'GinChat',
+    category: '认证与缓存',
+    date: '2026-04-22',
+    views: '856',
+    description: '整理 GinChat 中 access token、refresh token、用户缓存和在线状态的职责划分。',
+    tags: ['GinChat', 'JWT', 'Redis', 'Token', '限流'],
+    theme: 'memory',
+    sections: [
+      {
+        id: 'token',
+        title: 'Token 分工',
+        body: 'access token 用于接口鉴权，refresh token 用于续期。需要登录的 HTTP 接口通过 Authorization Bearer 传递 token，WebSocket 连接通过 URL 参数传递 token。',
+      },
+      {
+        id: 'redis',
+        title: 'Redis 状态',
+        body: 'Redis 在项目中承担用户信息缓存、在线状态、消息去重和 refresh token 存储。状态类数据放 Redis，核心业务数据落 PostgreSQL。',
+      },
+      {
+        id: 'limit',
+        title: '请求保护',
+        body: 'middleware 中提供 IP 限流能力，配合 JWT 鉴权和统一响应结构，让接口入口保持一致的错误处理方式。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-architecture',
+    title: 'Cloud Shop 微服务电商系统架构总览',
+    project: 'Cloud Shop',
+    category: '微服务架构',
+    date: '2026-04-21',
+    views: '1.5k',
+    description: '基于 Cloud Shop v1.1.0，梳理 gateway、业务服务、Dubbo RPC、RocketMQ、Redis、Elasticsearch 与 UniApp 的整体协作。',
+    tags: ['Cloud Shop', 'Spring Boot', 'Spring Cloud Alibaba', 'Dubbo', 'UniApp'],
+    theme: 'algorithm',
+    sections: [
+      {
+        id: 'entry',
+        title: '系统入口',
+        body: 'gateway 是唯一公网后端入口，负责校验公网 JWT，并向下游注入内部身份 Header。本地 Docker 环境通过 Nginx 暴露平台入口。',
+      },
+      {
+        id: 'services',
+        title: '服务拆分',
+        body: '系统包含 auth、user、product、stock、order、payment、search、governance 等服务，并通过 common-parent 统一公共依赖与约束。',
+      },
+      {
+        id: 'frontend',
+        title: '前端承载',
+        body: 'my-shop-uniapp 承载商城前端，后端通过 gateway 对外提供统一 API，内部服务之间使用 Dubbo 和消息队列解耦。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-outbox-rocketmq',
+    title: 'Cloud Shop 的 Outbox 与 RocketMQ 最终一致性',
+    project: 'Cloud Shop',
+    category: '消息与一致性',
+    date: '2026-04-20',
+    views: '1.3k',
+    description: '说明 Cloud Shop 如何用本地事务、outbox_event、RocketMQ 投递和幂等消费替代强一致分布式事务。',
+    tags: ['Cloud Shop', 'RocketMQ', 'Outbox', '最终一致性', '幂等消费'],
+    theme: 'network',
+    sections: [
+      {
+        id: 'model',
+        title: '一致性模型',
+        body: '跨服务写入使用 Local Transaction + Outbox + RocketMQ + 幂等消费。业务数据和 outbox_event 在同一个本地事务内提交，relay 再负责可靠投递。',
+      },
+      {
+        id: 'consumer',
+        title: '消费侧幂等',
+        body: '消费者必须按业务唯一键或消息事件 ID 做幂等，避免 RocketMQ 重试带来的重复扣减、重复更新或重复通知。',
+      },
+      {
+        id: 'tradeoff',
+        title: '工程取舍',
+        body: '这套方案牺牲瞬时强一致，换取微服务拆分后的可恢复性、可观测性和较低运行复杂度。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-gateway-security',
+    title: 'Cloud Shop Gateway、JWT 与内部 HMAC 信任链',
+    project: 'Cloud Shop',
+    category: '认证与安全',
+    date: '2026-04-19',
+    views: '1.1k',
+    description: '拆解公网 JWT 校验、内部身份 Header 注入、下游 HMAC 校验和服务间信任边界。',
+    tags: ['Cloud Shop', 'Gateway', 'JWT', 'HMAC', '安全'],
+    theme: 'code',
+    sections: [
+      {
+        id: 'public',
+        title: '公网入口',
+        body: '公网请求只进入 gateway。gateway 校验 JWT 后生成内部身份 Header，下游服务以这些 Header 作为内部身份来源。',
+      },
+      {
+        id: 'internal',
+        title: '内部调用',
+        body: '内部微服务之间校验 HMAC 签名，降低伪造内部 Header 的风险。Bearer Token 请求可绕过该校验，适合兼容特定入口。',
+      },
+      {
+        id: 'boundary',
+        title: '安全边界',
+        body: '核心边界在 gateway 与内部服务之间，外部身份和内部身份需要明确分层，避免下游服务重复解析公网认证逻辑。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-cache-strategy',
+    title: 'Cloud Shop Redis Cache-Aside 与延迟双删',
+    project: 'Cloud Shop',
+    category: '缓存设计',
+    date: '2026-04-18',
+    views: '920',
+    description: '整理商品、库存、支付等场景下 Redis 缓存的职责边界，以及 payment-service 的缓存限制。',
+    tags: ['Cloud Shop', 'Redis', 'Cache-Aside', '延迟双删', '缓存雪崩'],
+    theme: 'memory',
+    sections: [
+      {
+        id: 'aside',
+        title: 'Cache-Aside',
+        body: '读取时先查缓存，未命中再查数据库并回填；写入时先更新数据库，再删除缓存，必要时通过延迟双删降低并发脏读概率。',
+      },
+      {
+        id: 'payment',
+        title: '支付服务限制',
+        body: 'payment-service 的缓存只用于幂等和限流，不缓存金额和终态数据，避免支付终态被缓存污染。',
+      },
+      {
+        id: 'risk',
+        title: '高并发风险',
+        body: '热点库存行锁、缓存雪崩和 outbox relay 积压是系统重点性能风险，需要结合限流、预热、随机过期和监控处理。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-search',
+    title: 'Cloud Shop Elasticsearch 商品与店铺搜索',
+    project: 'Cloud Shop',
+    category: '搜索系统',
+    date: '2026-04-17',
+    views: '880',
+    description: '说明 search-service 如何承接商品与店铺检索，并和业务服务保持索引同步。',
+    tags: ['Cloud Shop', 'Elasticsearch', 'Search Service', '商品搜索'],
+    theme: 'algorithm',
+    sections: [
+      {
+        id: 'scope',
+        title: '搜索职责',
+        body: 'search-service 负责面向用户的商品与店铺检索，把高频查询从 MySQL 事务库中剥离出来。',
+      },
+      {
+        id: 'sync',
+        title: '索引同步',
+        body: '业务服务变更后通过事件或同步任务更新 Elasticsearch 索引，保证搜索侧具备最终一致的数据视图。',
+      },
+      {
+        id: 'query',
+        title: '查询优化',
+        body: '搜索接口适合承载关键词、分类、排序和分页能力，后续可扩展高亮、聚合筛选和搜索建议。',
+      },
+    ],
   },
 ];
 
-const categories: Category[] = [
-  { name: '计算机网络', count: 12, icon: <Network size={24} /> },
-  { name: '操作系统', count: 10, icon: <Server size={24} /> },
-  { name: '数据结构与算法', count: 18, icon: <Boxes size={24} /> },
-  { name: '计算机组成原理', count: 8, icon: <Layers3 size={24} /> },
-  { name: '编程语言', count: 14, icon: <Code2 size={24} /> },
-  { name: '数据库', count: 9, icon: <Database size={24} /> },
+const categoryMeta: Omit<Category, 'count'>[] = [
+  { name: '实时通讯', icon: <Network size={24} /> },
+  { name: '认证与缓存', icon: <ShieldCheck size={24} /> },
+  { name: '微服务架构', icon: <Server size={24} /> },
+  { name: '消息与一致性', icon: <Workflow size={24} /> },
+  { name: '认证与安全', icon: <Code2 size={24} /> },
+  { name: '缓存设计', icon: <Database size={24} /> },
+  { name: '搜索系统', icon: <Layers3 size={24} /> },
 ];
 
-const tags = [
-  '计算机网络',
-  '操作系统',
-  '数据结构',
-  '算法',
-  'C++',
-  'Linux',
-  '计算机组成原理',
-  '数据库',
-  '分布式系统',
-  'TCP/IP',
-  '进程线程',
-  '内存管理',
-  '编译原理',
-  '设计模式',
-];
+const categories: Category[] = categoryMeta.map((item) => ({
+  ...item,
+  count: articles.filter((article) => article.category === item.name).length,
+}));
+
+const tags = Array.from(new Set(articles.flatMap((article) => article.tags)));
 
 const projects: Project[] = [
   {
@@ -152,7 +334,7 @@ const projects: Project[] = [
     name: 'Cloud Shop Microservices',
     repo: 'USERON8/cloud',
     url: 'https://github.com/USERON8/cloud',
-    summary: 'Cloud Shop 是基于 Spring Boot、Spring Cloud Alibaba、Dubbo、RocketMQ、MySQL、Redis、Elasticsearch 与 UniApp 的微服务电商项目。',
+    summary: '基于 Spring Boot、Spring Cloud Alibaba、Dubbo、RocketMQ、MySQL、Redis、Elasticsearch 与 UniApp 的微服务电商项目。',
     role: '微服务电商平台',
     license: 'Apache-2.0',
     stars: '1',
@@ -181,16 +363,22 @@ function App() {
   const [selectedArticle, setSelectedArticle] = useState<Article>(articles[0]);
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
   const filteredArticles = useMemo(() => {
     const keyword = query.trim().toLowerCase();
-    if (!keyword) return articles;
-    return articles.filter((article) =>
-      [article.title, article.category, article.description, ...article.tags].some((item) =>
-        item.toLowerCase().includes(keyword),
-      ),
-    );
-  }, [query]);
+    return articles.filter((article) => {
+      const matchesKeyword =
+        !keyword ||
+        [article.title, article.project, article.category, article.description, ...article.tags].some((item) =>
+          item.toLowerCase().includes(keyword),
+        );
+      const matchesCategory = !activeCategory || article.category === activeCategory;
+      const matchesTag = !activeTag || article.tags.includes(activeTag);
+      return matchesKeyword && matchesCategory && matchesTag;
+    });
+  }, [activeCategory, activeTag, query]);
 
   const openArticle = (article: Article) => {
     setSelectedArticle(article);
@@ -203,6 +391,21 @@ function App() {
     setPage(nextPage);
     setMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openArticlesWithFilter = (filter?: { category?: string; tag?: string }) => {
+    setQuery('');
+    setActiveCategory(filter?.category ?? null);
+    setActiveTag(filter?.tag ?? null);
+    setPage('articles');
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const clearFilters = () => {
+    setQuery('');
+    setActiveCategory(null);
+    setActiveTag(null);
   };
 
   const toggleTheme = () => {
@@ -222,15 +425,26 @@ function App() {
         toggleTheme={toggleTheme}
       />
       <main>
-        {page === 'home' && <HomePage navigate={navigate} openArticle={openArticle} />}
-        {page === 'articles' && <ArticlesPage articles={filteredArticles} openArticle={openArticle} query={query} setQuery={setQuery} />}
+        {page === 'home' && <HomePage navigate={navigate} openArticle={openArticle} openArticlesWithFilter={openArticlesWithFilter} />}
+        {page === 'articles' && (
+          <ArticlesPage
+            articles={filteredArticles}
+            openArticle={openArticle}
+            query={query}
+            setQuery={setQuery}
+            activeCategory={activeCategory}
+            activeTag={activeTag}
+            clearFilters={clearFilters}
+            openArticlesWithFilter={openArticlesWithFilter}
+          />
+        )}
         {page === 'article' && <ArticlePage article={selectedArticle} openArticle={openArticle} />}
-        {page === 'categories' && <CategoriesPage />}
-        {page === 'tags' && <TagsPage />}
+        {page === 'categories' && <CategoriesPage openArticlesWithFilter={openArticlesWithFilter} />}
+        {page === 'tags' && <TagsPage openArticlesWithFilter={openArticlesWithFilter} />}
         {page === 'projects' && <ProjectsPage />}
         {page === 'about' && <AboutPage navigate={navigate} />}
       </main>
-      <Footer navigate={navigate} />
+      <Footer navigate={navigate} openArticlesWithFilter={openArticlesWithFilter} />
     </div>
   );
 }
@@ -302,24 +516,32 @@ function Header({
   );
 }
 
-function HomePage({ navigate, openArticle }: { navigate: (page: Page) => void; openArticle: (article: Article) => void }) {
+function HomePage({
+  navigate,
+  openArticle,
+  openArticlesWithFilter,
+}: {
+  navigate: (page: Page) => void;
+  openArticle: (article: Article) => void;
+  openArticlesWithFilter: (filter?: { category?: string; tag?: string }) => void;
+}) {
   return (
     <>
       <section className="hero-section reveal">
         <div className="hero-copy">
-          <p className="eyebrow">CS 学习笔记与工程成长记录</p>
+          <p className="eyebrow">围绕真实项目沉淀后端工程能力</p>
           <h1>
             你好，我是 <span>CodeExplorer</span>
           </h1>
           <p className="hero-description">
-            这里沉淀计算机网络、操作系统、算法、数据库和后端工程实践，把零散学习变成可复用的技术资产。
+            这里聚焦 GinChat 实时通讯服务与 Cloud Shop 微服务电商系统，记录架构设计、消息链路、缓存一致性、安全认证和搜索系统实践。
           </p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => navigate('articles')}>
               浏览文章
             </button>
-            <button className="secondary-button" onClick={() => navigate('about')}>
-              关于我
+            <button className="secondary-button" onClick={() => navigate('projects')}>
+              查看项目
             </button>
           </div>
         </div>
@@ -327,9 +549,9 @@ function HomePage({ navigate, openArticle }: { navigate: (page: Page) => void; o
       </section>
 
       <section className="content-section reveal delay-1">
-        <SectionHeading title="最新文章" action="查看全部" onClick={() => navigate('articles')} />
+        <SectionHeading title="项目文章" action="查看全部" onClick={() => navigate('articles')} />
         <div className="article-grid">
-          {articles.map((article) => (
+          {articles.slice(0, 4).map((article) => (
             <ArticleCard key={article.id} article={article} openArticle={openArticle} />
           ))}
         </div>
@@ -339,14 +561,14 @@ function HomePage({ navigate, openArticle }: { navigate: (page: Page) => void; o
         <SectionHeading title="分类浏览" action="查看分类" onClick={() => navigate('categories')} />
         <div className="category-grid">
           {categories.map((category) => (
-            <CategoryCard key={category.name} category={category} />
+            <CategoryCard key={category.name} category={category} onSelect={() => openArticlesWithFilter({ category: category.name })} />
           ))}
         </div>
       </section>
 
       <section className="content-section reveal delay-3">
-        <SectionHeading title="热门标签" action="查看标签" onClick={() => navigate('tags')} />
-        <TagCloud tags={tags} />
+        <SectionHeading title="技术标签" action="查看标签" onClick={() => navigate('tags')} />
+        <TagCloud tags={tags} onSelect={(tag) => openArticlesWithFilter({ tag })} />
       </section>
 
       <section className="content-section reveal delay-4">
@@ -359,8 +581,8 @@ function HomePage({ navigate, openArticle }: { navigate: (page: Page) => void; o
           <Rocket size={42} />
         </div>
         <div>
-          <h2>持续学习，持续探索</h2>
-          <p>记录关键问题，复盘工程实践，让每一次踩坑都变成下一次提效的依据。</p>
+          <h2>从项目复盘到技术文章</h2>
+          <p>每篇文章都对应真实仓库中的模块、链路或工程取舍，后续可以继续补充压测、部署和源码解析。</p>
         </div>
         <button className="primary-button" onClick={() => navigate('projects')}>
           查看项目
@@ -375,11 +597,19 @@ function ArticlesPage({
   openArticle,
   query,
   setQuery,
+  activeCategory,
+  activeTag,
+  clearFilters,
+  openArticlesWithFilter,
 }: {
   articles: Article[];
   openArticle: (article: Article) => void;
   query: string;
   setQuery: (value: string) => void;
+  activeCategory: string | null;
+  activeTag: string | null;
+  clearFilters: () => void;
+  openArticlesWithFilter: (filter?: { category?: string; tag?: string }) => void;
 }) {
   return (
     <section className="page-layout reveal">
@@ -393,15 +623,24 @@ function ArticlesPage({
           </label>
         </div>
         <div className="tabs">
-          <button className="active">最新</button>
-          <button>热门</button>
-          <button>推荐</button>
+          <button className="active">项目复盘</button>
+          <button onClick={() => openArticlesWithFilter({ tag: 'GinChat' })}>GinChat</button>
+          <button onClick={() => openArticlesWithFilter({ tag: 'Cloud Shop' })}>Cloud Shop</button>
         </div>
+        {(activeCategory || activeTag || query) && (
+          <div className="filter-bar">
+            {activeCategory && <span>分类：{activeCategory}</span>}
+            {activeTag && <span>标签：{activeTag}</span>}
+            {query && <span>搜索：{query}</span>}
+            <button onClick={clearFilters}>清除筛选</button>
+          </div>
+        )}
         <div className="article-list">
           {articles.map((article) => (
             <button className="article-row" key={article.id} onClick={() => openArticle(article)}>
               <Diagram type={article.theme} compact />
               <div>
+                <span className="category-badge">{article.project}</span>
                 <h2>{article.title}</h2>
                 <p>{article.description}</p>
                 <div className="meta-line">
@@ -412,19 +651,10 @@ function ArticlesPage({
               </div>
             </button>
           ))}
-        </div>
-        <div className="pagination">
-          {[1, 2, 3, 4, 5].map((number) => (
-            <button key={number} className={number === 1 ? 'active' : ''}>
-              {number}
-            </button>
-          ))}
-          <button aria-label="下一页">
-            <ChevronRight size={16} />
-          </button>
+          {articles.length === 0 && <div className="empty-state">没有匹配的文章，请调整分类、标签或搜索关键词。</div>}
         </div>
       </div>
-      <ArticleSidebar />
+      <ArticleSidebar openArticlesWithFilter={openArticlesWithFilter} />
     </section>
   );
 }
@@ -439,43 +669,40 @@ function ArticlePage({ article, openArticle }: { article: Article; openArticle: 
           <span>
             <CalendarDays size={15} /> {article.date}
           </span>
+          <span>{article.project}</span>
           <span>{article.category}</span>
           <span>{article.views} 阅读</span>
         </div>
         <div className="summary-box">
-          <strong>摘要：</strong>本文通过报文流和状态转换图解释核心 CS 概念，并补充面试中容易追问的细节。
+          <strong>摘要：</strong>
+          {article.description}
         </div>
-        <h2 id="three-way">三次握手</h2>
-        <p>TCP 通过 SYN、SYN-ACK、ACK 建立可靠连接，客户端与服务端在传输数据前完成初始序列号同步。</p>
-        <Diagram type="network" />
-        <ol>
-          <li>客户端发送 SYN，进入 SYN_SENT 状态。</li>
-          <li>服务端回复 SYN-ACK，进入 SYN_RCVD 状态。</li>
-          <li>客户端发送 ACK，双方进入 ESTABLISHED 状态。</li>
-        </ol>
-        <h2 id="four-way">四次挥手</h2>
-        <p>连接释放需要分别关闭两个方向的数据流，因此正常路径下 FIN 与 ACK 会拆成四次报文交互。</p>
-        <pre>
-          <code>{`client.close()
-send FIN
-wait ACK
-receive FIN
-send ACK`}</code>
-        </pre>
-        <h2 id="questions">常见问题</h2>
-        <p>重点关注 TIME_WAIT 归属、重复报文处理，以及为什么两次报文足以确认但不足以安全建立连接。</p>
+        {article.sections.map((section) => (
+          <section key={section.id}>
+            <h2 id={section.id}>{section.title}</h2>
+            <p>{section.body}</p>
+          </section>
+        ))}
+        <Diagram type={article.theme} />
+        {article.code && (
+          <pre>
+            <code>{article.code}</code>
+          </pre>
+        )}
       </article>
       <aside className="side-panel">
         <div className="panel-card">
           <h3>目录</h3>
-          <a href="#three-way">三次握手</a>
-          <a href="#four-way">四次挥手</a>
-          <a href="#questions">常见问题</a>
+          {article.sections.map((section) => (
+            <a key={section.id} href={`#${section.id}`}>
+              {section.title}
+            </a>
+          ))}
         </div>
         <div className="panel-card">
           <h3>相关文章</h3>
           {articles
-            .filter((item) => item.id !== article.id)
+            .filter((item) => item.id !== article.id && item.project === article.project)
             .slice(0, 3)
             .map((item) => (
               <button key={item.id} className="related-link" onClick={() => openArticle(item)}>
@@ -489,27 +716,27 @@ send ACK`}</code>
   );
 }
 
-function CategoriesPage() {
+function CategoriesPage({ openArticlesWithFilter }: { openArticlesWithFilter: (filter?: { category?: string; tag?: string }) => void }) {
   return (
     <section className="simple-page reveal">
       <Breadcrumb current="分类" />
       <h1>分类</h1>
       <div className="category-grid wide">
         {categories.map((category) => (
-          <CategoryCard key={category.name} category={category} />
+          <CategoryCard key={category.name} category={category} onSelect={() => openArticlesWithFilter({ category: category.name })} />
         ))}
       </div>
     </section>
   );
 }
 
-function TagsPage() {
+function TagsPage({ openArticlesWithFilter }: { openArticlesWithFilter: (filter?: { category?: string; tag?: string }) => void }) {
   return (
     <section className="simple-page reveal">
       <Breadcrumb current="标签" />
       <h1>标签</h1>
       <div className="tag-panel">
-        <TagCloud tags={tags} />
+        <TagCloud tags={tags} onSelect={(tag) => openArticlesWithFilter({ tag })} />
       </div>
     </section>
   );
@@ -560,7 +787,7 @@ function AboutPage({ navigate }: { navigate: (page: Page) => void }) {
       <div className="profile-card">
         <div className="profile-avatar">CE</div>
         <h1>CodeExplorer</h1>
-        <p>CS 学习者 / 后端开发者</p>
+        <p>后端工程学习者 / 项目复盘记录者</p>
         <div className="profile-links">
           <Github size={18} />
           <Mail size={18} />
@@ -569,9 +796,9 @@ function AboutPage({ navigate }: { navigate: (page: Page) => void }) {
       </div>
       <div className="about-content">
         <h2>个人介绍</h2>
-        <p>本站用于记录 CS 基础、后端工程实践和项目复盘。当前重点项目包括 GinChat 实时通讯服务与 Cloud Shop 微服务电商系统。</p>
+        <p>本站用于记录 GinChat 与 Cloud Shop 两个真实项目中的架构设计、技术链路、问题复盘和后续优化计划。</p>
         <h2>技术栈</h2>
-        <TagCloud tags={['Go', 'Gin', 'Java', 'Spring Cloud Alibaba', 'Dubbo', 'RocketMQ', 'Redis', 'MySQL', 'Elasticsearch', 'UniApp']} />
+        <TagCloud tags={['Go', 'Gin', 'WebSocket', 'Spring Cloud Alibaba', 'Dubbo', 'RocketMQ', 'Redis', 'MySQL', 'Elasticsearch', 'UniApp']} />
         <button className="primary-button" onClick={() => navigate('projects')}>
           查看项目
         </button>
@@ -580,7 +807,13 @@ function AboutPage({ navigate }: { navigate: (page: Page) => void }) {
   );
 }
 
-function Footer({ navigate }: { navigate: (page: Page) => void }) {
+function Footer({
+  navigate,
+  openArticlesWithFilter,
+}: {
+  navigate: (page: Page) => void;
+  openArticlesWithFilter: (filter?: { category?: string; tag?: string }) => void;
+}) {
   return (
     <footer className="site-footer">
       <div>
@@ -590,7 +823,7 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
           </span>
           <span>CodeExplorer</span>
         </button>
-        <p>CS 学习笔记、技术文章和项目记录。</p>
+        <p>围绕真实项目的技术文章、工程复盘和项目记录。</p>
         <div className="social-row">
           <Github size={18} />
           <Mail size={18} />
@@ -607,10 +840,11 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
         </div>
         <div>
           <h3>分类</h3>
-          <span>计算机网络</span>
-          <span>操作系统</span>
-          <span>数据结构</span>
-          <span>编程语言</span>
+          {categories.slice(0, 4).map((category) => (
+            <button key={category.name} onClick={() => openArticlesWithFilter({ category: category.name })}>
+              {category.name}
+            </button>
+          ))}
         </div>
         <div>
           <h3>联系</h3>
@@ -746,7 +980,7 @@ function ArticleCard({ article, openArticle }: { article: Article; openArticle: 
     <button className="article-card" onClick={() => openArticle(article)}>
       <Diagram type={article.theme} compact />
       <div className="card-body">
-        <span className="category-badge">{article.category}</span>
+        <span className="category-badge">{article.project}</span>
         <h3>{article.title}</h3>
         <p>{article.description}</p>
         <div className="meta-line">
@@ -758,23 +992,25 @@ function ArticleCard({ article, openArticle }: { article: Article; openArticle: 
   );
 }
 
-function CategoryCard({ category }: { category: Category }) {
+function CategoryCard({ category, onSelect }: { category: Category; onSelect: () => void }) {
   return (
-    <article className="category-card">
+    <button className="category-card" onClick={onSelect}>
       <div className="category-icon">{category.icon}</div>
       <div>
         <h3>{category.name}</h3>
         <p>{category.count} 篇文章</p>
       </div>
-    </article>
+    </button>
   );
 }
 
-function TagCloud({ tags }: { tags: string[] }) {
+function TagCloud({ tags, onSelect }: { tags: string[]; onSelect?: (tag: string) => void }) {
   return (
     <div className="tag-cloud">
       {tags.map((tag) => (
-        <button key={tag}>{tag}</button>
+        <button key={tag} onClick={() => onSelect?.(tag)}>
+          {tag}
+        </button>
       ))}
     </div>
   );
@@ -790,13 +1026,13 @@ function Breadcrumb({ current, parent }: { current: string; parent?: string }) {
   );
 }
 
-function ArticleSidebar() {
+function ArticleSidebar({ openArticlesWithFilter }: { openArticlesWithFilter: (filter?: { category?: string; tag?: string }) => void }) {
   return (
     <aside className="side-panel">
       <div className="panel-card">
         <h3>分类</h3>
         {categories.map((category) => (
-          <button className="side-row" key={category.name}>
+          <button className="side-row" key={category.name} onClick={() => openArticlesWithFilter({ category: category.name })}>
             <span>{category.name}</span>
             <strong>{category.count}</strong>
           </button>
@@ -804,7 +1040,7 @@ function ArticleSidebar() {
       </div>
       <div className="panel-card">
         <h3>标签云</h3>
-        <TagCloud tags={tags.slice(0, 10)} />
+        <TagCloud tags={tags.slice(0, 14)} onSelect={(tag) => openArticlesWithFilter({ tag })} />
       </div>
     </aside>
   );
@@ -844,15 +1080,15 @@ function HeroVisual() {
   );
 }
 
-function Diagram({ type, compact = false }: { type: Article['theme']; compact?: boolean }) {
+function Diagram({ type, compact = false }: { type: ArticleTheme; compact?: boolean }) {
   if (type === 'network') {
     return (
       <div className={`diagram network-diagram ${compact ? 'compact' : ''}`}>
-        <div className="node left">客户端</div>
-        <div className="node right">服务端</div>
-        <span className="line l1">SYN</span>
-        <span className="line l2">SYN + ACK</span>
-        <span className="line l3">ACK</span>
+        <div className="node left">生产者</div>
+        <div className="node right">消费者</div>
+        <span className="line l1">写入事件</span>
+        <span className="line l2">投递消息</span>
+        <span className="line l3">幂等消费</span>
       </div>
     );
   }
@@ -860,11 +1096,11 @@ function Diagram({ type, compact = false }: { type: Article['theme']; compact?: 
   if (type === 'algorithm') {
     return (
       <div className={`diagram tree-diagram ${compact ? 'compact' : ''}`}>
-        <span className="tree-node root">根</span>
-        <span className="tree-node n1">左</span>
-        <span className="tree-node n2">右</span>
-        <span className="tree-node n3">叶</span>
-        <span className="tree-node n4">叶</span>
+        <span className="tree-node root">网关</span>
+        <span className="tree-node n1">服务</span>
+        <span className="tree-node n2">消息</span>
+        <span className="tree-node n3">缓存</span>
+        <span className="tree-node n4">搜索</span>
       </div>
     );
   }
@@ -872,8 +1108,8 @@ function Diagram({ type, compact = false }: { type: Article['theme']; compact?: 
   if (type === 'memory') {
     return (
       <div className={`diagram memory-diagram ${compact ? 'compact' : ''}`}>
-        {[0, 1, 2, 3, 4, 5].map((item) => (
-          <span key={item}>页 {item}</span>
+        {['Token', '用户缓存', '在线状态', '幂等键', '限流键', '延迟删除'].map((item) => (
+          <span key={item}>{item}</span>
         ))}
       </div>
     );
@@ -881,10 +1117,10 @@ function Diagram({ type, compact = false }: { type: Article['theme']; compact?: 
 
   return (
     <div className={`diagram code-diagram ${compact ? 'compact' : ''}`}>
-      <span>const note = &#123;</span>
-      <span> topic: "closure",</span>
-      <span> scope: "lexical"</span>
-      <span>&#125;;</span>
+      <span>project := realRepo</span>
+      <span>article := architectureNote</span>
+      <span>tags := techStack</span>
+      <span>publish(article)</span>
     </div>
   );
 }

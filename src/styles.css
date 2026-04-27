@@ -646,7 +646,9 @@ main {
   display: flex;
   align-items: center;
   gap: 18px;
+  width: 100%;
   padding: 24px;
+  text-align: left;
 }
 
 .category-icon,
@@ -827,9 +829,50 @@ main {
   color: var(--primary);
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.filter-bar span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.filter-bar button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .article-list {
   display: grid;
   gap: 18px;
+}
+
+.empty-state {
+  padding: 28px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--muted);
+  text-align: center;
 }
 
 .article-row {
