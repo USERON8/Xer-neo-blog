@@ -69,7 +69,7 @@ type Project = {
 const articles: Article[] = [
   {
     id: 'ginchat-architecture',
-    title: 'GinChat 单体 IM 服务架构拆解',
+    title: 'GinChat 架构笔记：从 HTTP 到 WebSocket',
     project: 'GinChat',
     category: '实时通讯',
     date: '2026-04-24',
@@ -101,7 +101,7 @@ client.WritePump()`,
   },
   {
     id: 'ginchat-websocket-flow',
-    title: 'GinChat WebSocket 消息链路与 Worker Pool',
+    title: 'GinChat 实时链路：WebSocket、去重与异步写库',
     project: 'GinChat',
     category: '实时通讯',
     date: '2026-04-23',
@@ -129,7 +129,7 @@ client.WritePump()`,
   },
   {
     id: 'ginchat-auth-cache',
-    title: 'GinChat JWT 认证、Refresh Token 与 Redis 状态管理',
+    title: 'GinChat 会话体系：JWT、Refresh Token 与 Redis 状态',
     project: 'GinChat',
     category: '认证与缓存',
     date: '2026-04-22',
@@ -157,7 +157,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-architecture',
-    title: 'Cloud Shop 微服务电商系统架构总览',
+    title: 'Cloud Shop 架构全景：网关、服务与前端入口',
     project: 'Cloud Shop',
     category: '微服务架构',
     date: '2026-04-21',
@@ -185,7 +185,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-outbox-rocketmq',
-    title: 'Cloud Shop 的 Outbox 与 RocketMQ 最终一致性',
+    title: 'Cloud Shop 一致性方案：Outbox、RocketMQ 与幂等消费',
     project: 'Cloud Shop',
     category: '消息与一致性',
     date: '2026-04-20',
@@ -213,7 +213,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-gateway-security',
-    title: 'Cloud Shop Gateway、JWT 与内部 HMAC 信任链',
+    title: 'Cloud Shop 安全边界：Gateway、JWT 与 HMAC 信任链',
     project: 'Cloud Shop',
     category: '认证与安全',
     date: '2026-04-19',
@@ -241,7 +241,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-cache-strategy',
-    title: 'Cloud Shop Redis Cache-Aside 与延迟双删',
+    title: 'Cloud Shop 缓存策略：Cache-Aside 与延迟双删',
     project: 'Cloud Shop',
     category: '缓存设计',
     date: '2026-04-18',
@@ -269,7 +269,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-search',
-    title: 'Cloud Shop Elasticsearch 商品与店铺搜索',
+    title: 'Cloud Shop 搜索体系：Elasticsearch、热词与索引同步',
     project: 'Cloud Shop',
     category: '搜索系统',
     date: '2026-04-17',
@@ -297,7 +297,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-service-boundary',
-    title: 'Cloud Shop 服务边界与路由归属',
+    title: 'Cloud Shop 服务边界：路由归属与职责拆分',
     project: 'Cloud Shop',
     category: '服务边界',
     date: '2026-04-16',
@@ -325,7 +325,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-frontend-api-chain',
-    title: 'Cloud Shop UniApp 前端 API 链路',
+    title: 'Cloud Shop 前端链路：UniApp API、会话与支付跳转',
     project: 'Cloud Shop',
     category: '前端接口',
     date: '2026-04-15',
@@ -353,7 +353,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-order-stock-payment',
-    title: 'Cloud Shop 订单、库存与支付协作链路',
+    title: 'Cloud Shop 交易链路：订单、库存与支付协作',
     project: 'Cloud Shop',
     category: '交易链路',
     date: '2026-04-14',
@@ -381,7 +381,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-product-search-sync',
-    title: 'Cloud Shop 商品域与搜索索引同步',
+    title: 'Cloud Shop 商品索引：商品域到搜索域的同步',
     project: 'Cloud Shop',
     category: '搜索系统',
     date: '2026-04-13',
@@ -409,7 +409,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-observability-governance',
-    title: 'Cloud Shop 可观测性与治理入口',
+    title: 'Cloud Shop 可观测性：SkyWalking、Prometheus 与治理台',
     project: 'Cloud Shop',
     category: '可观测性',
     date: '2026-04-12',
@@ -437,7 +437,7 @@ client.WritePump()`,
   },
   {
     id: 'cloud-dev-startup-test',
-    title: 'Cloud Shop 本地启动与测试脚本索引',
+    title: 'Cloud Shop 工程效率：启动脚本、烟测与 k6 压测',
     project: 'Cloud Shop',
     category: '工程效率',
     date: '2026-04-11',
@@ -465,7 +465,7 @@ client.WritePump()`,
   },
   {
     id: 'ginchat-api-contract',
-    title: 'GinChat 用户、好友、群组与消息接口设计',
+    title: 'GinChat 接口设计：用户、好友、群组与消息',
     project: 'GinChat',
     category: '接口设计',
     date: '2026-04-10',
@@ -493,7 +493,7 @@ client.WritePump()`,
   },
   {
     id: 'ginchat-runtime-layout',
-    title: 'GinChat 项目结构与运行方式',
+    title: 'GinChat 工程结构：分层目录、配置与本地启动',
     project: 'GinChat',
     category: '工程效率',
     date: '2026-04-09',
@@ -521,7 +521,7 @@ client.WritePump()`,
   },
   {
     id: 'rust-blog-backend-architecture',
-    title: 'blog-web Rust 社交博客后端架构',
+    title: 'blog-web 架构笔记：Axum、SeaORM 与领域模块',
     project: 'blog-web',
     category: 'Rust 后端',
     date: '2026-04-08',
@@ -549,7 +549,7 @@ client.WritePump()`,
   },
   {
     id: 'rust-blog-api-search-cache',
-    title: 'blog-web API、全文搜索与 Redis 缓存',
+    title: 'blog-web 读路径优化：API、全文搜索与 Redis 缓存',
     project: 'blog-web',
     category: '搜索系统',
     date: '2026-04-07',
@@ -577,7 +577,7 @@ client.WritePump()`,
   },
   {
     id: 'agent-demo-desktop-assistant',
-    title: 'Agent Demo Windows 本地文件助手设计',
+    title: 'Agent Demo 产品拆解：Windows 本地文件助手',
     project: 'Agent Demo',
     category: 'AI 工具',
     date: '2026-04-06',
@@ -605,7 +605,7 @@ client.WritePump()`,
   },
   {
     id: 'agent-demo-safe-cleanup',
-    title: 'Agent Demo 安全清理与隔离区工作流',
+    title: 'Agent Demo 安全模型：候选审查、隔离区与恢复',
     project: 'Agent Demo',
     category: '安全清理',
     date: '2026-04-05',
@@ -848,7 +848,7 @@ function Header({
           <span className="brand-mark">
             <Code2 size={17} />
           </span>
-          <span>CodeExplorer</span>
+          <span>Xer Neo Lab</span>
         </button>
         <nav className="desktop-nav">
           {navItems.map((item) => (
@@ -902,10 +902,10 @@ function HomePage({
         <div className="hero-copy">
           <p className="eyebrow">围绕真实项目沉淀后端工程能力</p>
           <h1>
-            你好，我是 <span>CodeExplorer</span>
+            你好，我是 <span>Xer Neo</span>
           </h1>
           <p className="hero-description">
-            这里聚焦 GinChat 实时通讯服务与 Cloud Shop 微服务电商系统，记录架构设计、消息链路、缓存一致性、安全认证和搜索系统实践。
+            这里聚焦 GinChat、Cloud Shop、blog-web 与 Agent Demo，记录架构设计、消息链路、缓存一致性、安全认证、搜索系统和桌面 AI 工具实践。
           </p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => navigate('articles')}>
@@ -997,6 +997,8 @@ function ArticlesPage({
           <button className="active">项目复盘</button>
           <button onClick={() => openArticlesWithFilter({ tag: 'GinChat' })}>GinChat</button>
           <button onClick={() => openArticlesWithFilter({ tag: 'Cloud Shop' })}>Cloud Shop</button>
+          <button onClick={() => openArticlesWithFilter({ tag: 'blog-web' })}>blog-web</button>
+          <button onClick={() => openArticlesWithFilter({ tag: 'Agent Demo' })}>Agent Demo</button>
         </div>
         {(activeCategory || activeTag || query) && (
           <div className="filter-bar">
@@ -1048,18 +1050,15 @@ function ArticlePage({ article, openArticle }: { article: Article; openArticle: 
           <strong>摘要：</strong>
           {article.description}
         </div>
-        {article.sections.map((section) => (
-          <section key={section.id}>
+        <ArticleVisual article={article} />
+        {article.sections.map((section, index) => (
+          <section className="article-section" key={section.id}>
+            <span className="section-index">{String(index + 1).padStart(2, '0')}</span>
             <h2 id={section.id}>{section.title}</h2>
             <p>{section.body}</p>
           </section>
         ))}
-        <Diagram type={article.theme} />
-        {article.code && (
-          <pre>
-            <code>{article.code}</code>
-          </pre>
-        )}
+        <CodeSample article={article} />
       </article>
       <aside className="side-panel">
         <div className="panel-card">
@@ -1123,7 +1122,7 @@ function ProjectsPage() {
         <div>
           <p className="eyebrow">GitHub 真实项目沉淀</p>
           <h1>项目</h1>
-          <p>这里展示当前公开仓库中最能体现后端工程能力的两个项目：一个聚焦实时通讯链路，一个覆盖微服务电商全链路。</p>
+          <p>这里展示当前项目矩阵：实时通讯、微服务电商、Rust 社交博客后端和 Windows 本地 AI 文件助手。</p>
         </div>
         <a className="github-link" href="https://github.com/USERON8" target="_blank" rel="noreferrer">
           <Github size={18} />
@@ -1157,8 +1156,8 @@ function AboutPage({ navigate }: { navigate: (page: Page) => void }) {
       <Breadcrumb current="关于我" />
       <div className="profile-card">
         <div className="profile-avatar">CE</div>
-        <h1>CodeExplorer</h1>
-        <p>后端工程学习者 / 项目复盘记录者</p>
+        <h1>Xer Neo</h1>
+        <p>后端工程 / AI 工具 / 项目复盘</p>
         <div className="profile-links">
           <Github size={18} />
           <Mail size={18} />
@@ -1167,9 +1166,9 @@ function AboutPage({ navigate }: { navigate: (page: Page) => void }) {
       </div>
       <div className="about-content">
         <h2>个人介绍</h2>
-        <p>本站用于记录 GinChat 与 Cloud Shop 两个真实项目中的架构设计、技术链路、问题复盘和后续优化计划。</p>
+        <p>本站用于记录 GinChat、Cloud Shop、blog-web 和 Agent Demo 的架构设计、技术链路、问题复盘和后续优化计划。</p>
         <h2>技术栈</h2>
-        <TagCloud tags={['Go', 'Gin', 'WebSocket', 'Spring Cloud Alibaba', 'Dubbo', 'RocketMQ', 'Redis', 'MySQL', 'Elasticsearch', 'UniApp']} />
+        <TagCloud tags={['Go', 'Gin', 'WebSocket', 'Java', 'Spring Cloud Alibaba', 'RocketMQ', 'Rust', 'Axum', 'Python', 'PySide6', 'LangGraph']} />
         <button className="primary-button" onClick={() => navigate('projects')}>
           查看项目
         </button>
@@ -1192,7 +1191,7 @@ function Footer({
           <span className="brand-mark">
             <Code2 size={17} />
           </span>
-          <span>CodeExplorer</span>
+          <span>Xer Neo Lab</span>
         </button>
         <p>围绕真实项目的技术文章、工程复盘和项目记录。</p>
         <div className="social-row">
@@ -1219,7 +1218,7 @@ function Footer({
         </div>
         <div>
           <h3>联系</h3>
-          <span>hello@codeexplorer.com</span>
+          <span>hello@xerneo.dev</span>
           <span>已适配 GitHub Pages</span>
         </div>
       </div>
@@ -1270,6 +1269,113 @@ function ProjectShowcase({ compact = false }: { compact?: boolean }) {
       ))}
     </div>
   );
+}
+
+function ArticleVisual({ article }: { article: Article }) {
+  const steps = getArticleVisualSteps(article);
+
+  return (
+    <div className={`article-visual-card ${article.theme}`}>
+      <div className="visual-header">
+        <div>
+          <span>{article.project}</span>
+          <h3>{getVisualTitle(article)}</h3>
+        </div>
+        <ProjectBadge project={article.project} />
+      </div>
+      <div className="visual-flow">
+        {steps.map((step, index) => (
+          <div className="visual-step" key={step}>
+            <strong>{String(index + 1).padStart(2, '0')}</strong>
+            <span>{step}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CodeSample({ article }: { article: Article }) {
+  const snippet = article.code ?? getArticleCode(article);
+
+  return (
+    <div className="code-sample">
+      <div className="code-title">
+        <span>{getCodeLabel(article)}</span>
+        <strong>{article.project}</strong>
+      </div>
+      <pre>
+        <code>{snippet}</code>
+      </pre>
+    </div>
+  );
+}
+
+function ProjectBadge({ project }: { project: string }) {
+  return <span className="project-badge">{project}</span>;
+}
+
+function getVisualTitle(article: Article) {
+  if (article.project === 'GinChat') return '实时消息链路';
+  if (article.project === 'Cloud Shop') return '微服务协作链路';
+  if (article.project === 'blog-web') return '内容平台读写链路';
+  return '本地助手安全工作流';
+}
+
+function getArticleVisualSteps(article: Article) {
+  if (article.project === 'GinChat') {
+    return ['HTTP 鉴权', 'WebSocket 连接', 'Redis 状态', '异步落库', '在线推送'];
+  }
+  if (article.project === 'Cloud Shop') {
+    return ['Gateway 入口', '领域服务', '本地事务', 'Outbox 事件', '治理观测'];
+  }
+  if (article.project === 'blog-web') {
+    return ['Axum Router', 'Domain Handler', 'SeaORM Entity', 'PostgreSQL FTS', 'Redis Cache'];
+  }
+  return ['检索候选', '生成计划', '人工确认', '移动隔离', '可逆恢复'];
+}
+
+function getCodeLabel(article: Article) {
+  if (article.project === 'GinChat') return 'Go / WebSocket';
+  if (article.project === 'Cloud Shop') return 'Spring Cloud / MQ';
+  if (article.project === 'blog-web') return 'Rust / Axum';
+  return 'Python / FastAPI';
+}
+
+function getArticleCode(article: Article) {
+  if (article.project === 'GinChat') {
+    return `func (c *Client) ReadPump() {
+  for {
+    msg := c.readJSON()
+    if redis.SetNX(msg.MsgID, 60*time.Second) {
+      workerPool.Submit(msg)
+      manager.Forward(msg)
+    }
+  }
+}`;
+  }
+
+  if (article.project === 'Cloud Shop') {
+    return `@Transactional
+public void createOrder(CreateOrderCommand command) {
+  orderRepository.save(order);
+  outboxRepository.save(OrderCreatedEvent.of(order));
+  transaction.afterCommit(outboxRelay::publish);
+}`;
+  }
+
+  if (article.project === 'blog-web') {
+    return `let app = Router::new()
+  .nest("/api/v1/auth", auth_routes())
+  .nest("/api/v1/posts", post_routes())
+  .layer(auth_middleware(state.clone()))
+  .with_state(state);`;
+  }
+
+  return `async def chat(request: ChatRequest):
+    candidates = retrieval.search(request.query)
+    report = cleanup.review(candidates)
+    return {"plan": report, "action": "quarantine_only"}`;
 }
 
 function ProjectDetail({ project }: { project: Project }) {
