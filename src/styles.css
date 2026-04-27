@@ -1202,6 +1202,26 @@ main {
   font-weight: 800;
 }
 
+.local-project-note {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  margin-top: 18px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.local-project-note.large {
+  width: 100%;
+  justify-content: center;
+  border-radius: 8px;
+  text-align: center;
+}
+
 .project-stats {
   display: flex;
   flex-wrap: wrap;
@@ -1316,6 +1336,26 @@ main {
 .project-feature.green .project-feature-head span,
 .project-card.green .project-role {
   color: #19a974;
+}
+
+.project-icon.purple {
+  background: rgba(124, 92, 255, 0.14);
+  color: #6d5df6;
+}
+
+.project-feature.purple .project-feature-head span,
+.project-card.purple .project-role {
+  color: #6d5df6;
+}
+
+.project-icon.orange {
+  background: rgba(245, 158, 11, 0.16);
+  color: #d97706;
+}
+
+.project-feature.orange .project-feature-head span,
+.project-card.orange .project-role {
+  color: #d97706;
 }
 
 .about-layout {
@@ -1578,6 +1618,16 @@ main {
 .site-shell[data-theme='dark'] .project-icon.green {
   background: rgba(32, 185, 129, 0.16);
   color: #49d19a;
+}
+
+.site-shell[data-theme='dark'] .project-icon.purple {
+  background: rgba(124, 92, 255, 0.18);
+  color: #a89cff;
+}
+
+.site-shell[data-theme='dark'] .project-icon.orange {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
 }
 
 .site-shell[data-theme='dark'] .learning-banner {

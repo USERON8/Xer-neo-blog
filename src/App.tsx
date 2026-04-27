@@ -32,7 +32,7 @@ type ArticleTheme = 'network' | 'algorithm' | 'memory' | 'code';
 type Article = {
   id: string;
   title: string;
-  project: 'GinChat' | 'Cloud Shop';
+  project: string;
   category: string;
   date: string;
   views: string;
@@ -52,7 +52,7 @@ type Category = {
 type Project = {
   name: string;
   repo: string;
-  url: string;
+  url?: string;
   summary: string;
   role: string;
   license: string;
@@ -63,7 +63,7 @@ type Project = {
   stack: string[];
   highlights: string[];
   modules: string[];
-  color: 'blue' | 'green';
+  color: 'blue' | 'green' | 'purple' | 'orange';
 };
 
 const articles: Article[] = [
@@ -463,6 +463,174 @@ client.WritePump()`,
       },
     ],
   },
+  {
+    id: 'ginchat-api-contract',
+    title: 'GinChat 用户、好友、群组与消息接口设计',
+    project: 'GinChat',
+    category: '接口设计',
+    date: '2026-04-10',
+    views: '760',
+    description: '根据 GinChat README 梳理注册登录、好友申请、群组管理、历史消息、未读消息和统一响应格式。',
+    tags: ['GinChat', 'REST API', '好友关系', '群组管理', '统一响应'],
+    theme: 'code',
+    sections: [
+      {
+        id: 'user-api',
+        title: '用户接口',
+        body: 'GinChat 用户模块提供注册、登录、刷新 token、个人信息查询与修改、密码修改、用户搜索和退出登录。需要登录的接口统一携带 Authorization: Bearer <access_token>。',
+      },
+      {
+        id: 'social-api',
+        title: '好友与群组',
+        body: '好友模块包含发送申请、同意或拒绝申请、收到的申请列表、好友列表和删除好友。群组模块包含创建群、我的群列表、群详情、成员列表、邀请成员、踢出成员和群聊历史消息。',
+      },
+      {
+        id: 'message-api',
+        title: '消息接口',
+        body: '消息模块提供私聊历史消息、未读消息数和标记已读。历史消息使用 lastId + size 的游标分页方式，避免大偏移分页在消息表上产生额外压力。',
+      },
+    ],
+  },
+  {
+    id: 'ginchat-runtime-layout',
+    title: 'GinChat 项目结构与运行方式',
+    project: 'GinChat',
+    category: '工程效率',
+    date: '2026-04-09',
+    views: '690',
+    description: '整理 GinChat 的 internal、middleware、pkg、router 分层，以及 PostgreSQL、Redis、Viper、Zap、Docker Compose 的启动路径。',
+    tags: ['GinChat', '项目结构', 'Docker Compose', 'Zap', 'Viper'],
+    theme: 'memory',
+    sections: [
+      {
+        id: 'layout',
+        title: '目录分层',
+        body: 'internal/handler 承接路由处理，internal/model 管理数据模型，internal/ws 放置 WebSocket 核心，middleware 负责 JWT、日志和限流，pkg 封装配置、数据库、JWT、日志、Redis 和统一响应。',
+      },
+      {
+        id: 'config',
+        title: '配置与依赖',
+        body: '项目通过 config/config.example.yaml 生成本地配置，依赖 PostgreSQL 和 Redis。数据库连接池、Redis 连接池、JWT secret 和过期时间都在配置中集中管理。',
+      },
+      {
+        id: 'startup',
+        title: '本地启动',
+        body: '本地启动路径是 docker-compose up -d 启动 PostgreSQL 与 Redis，然后执行 go run main.go。服务默认运行在 http://localhost:8080。',
+      },
+    ],
+  },
+  {
+    id: 'rust-blog-backend-architecture',
+    title: 'blog-web Rust 社交博客后端架构',
+    project: 'blog-web',
+    category: 'Rust 后端',
+    date: '2026-04-08',
+    views: '820',
+    description: '基于 Axum、SeaORM、PostgreSQL 和 Redis，拆解 blog-web 的认证、文章、评论、点赞、关注、通知和搜索模块。',
+    tags: ['blog-web', 'Rust', 'Axum', 'SeaORM', 'PostgreSQL', 'Redis'],
+    theme: 'algorithm',
+    sections: [
+      {
+        id: 'stack',
+        title: '技术栈',
+        body: 'blog-web 使用 Rust 2024、Axum、SeaORM、PostgreSQL、Redis 和 Docker Compose，业务接口统一挂载在 /api/v1 下。',
+      },
+      {
+        id: 'domain',
+        title: '领域模块',
+        body: '项目按 src/domains 拆分认证、用户、文章、评论、点赞、关注、通知、设置、标签和搜索等业务模块，SeaORM entities 承接数据库表映射。',
+      },
+      {
+        id: 'startup',
+        title: '启动迁移',
+        body: '服务启动时会自动应用 db/*.sql 迁移。开发时先 docker compose up -d 启动依赖，再 cargo run --bin app，最后通过 /health 验证服务状态。',
+      },
+    ],
+  },
+  {
+    id: 'rust-blog-api-search-cache',
+    title: 'blog-web API、全文搜索与 Redis 缓存',
+    project: 'blog-web',
+    category: '搜索系统',
+    date: '2026-04-07',
+    views: '740',
+    description: '梳理 blog-web 的公开接口、登录接口、PostgreSQL 全文搜索、Redis 响应缓存和本地种子数据命令。',
+    tags: ['blog-web', 'Full Text Search', 'Redis Cache', 'JWT', 'Seeder'],
+    theme: 'network',
+    sections: [
+      {
+        id: 'public-api',
+        title: '公开接口',
+        body: '公开接口包含注册、登录、文章列表、文章详情、评论列表、标签列表、文章搜索、关注者和正在关注列表，适合承载匿名浏览场景。',
+      },
+      {
+        id: 'auth-api',
+        title: '登录后接口',
+        body: '登录后可以创建文章、评论、点赞、取消点赞、关注、取消关注、读取通知、全部标记已读以及读取和更新个人设置。',
+      },
+      {
+        id: 'search-cache',
+        title: '搜索与缓存',
+        body: '文章全文搜索由 PostgreSQL full-text search 承载，当前已使用目标 GIN FTS 索引。部分读取端点使用 Redis 响应缓存，后续大数据量可继续引入 keyset pagination 和持久化 tsvector 列。',
+      },
+    ],
+  },
+  {
+    id: 'agent-demo-desktop-assistant',
+    title: 'Agent Demo Windows 本地文件助手设计',
+    project: 'Agent Demo',
+    category: 'AI 工具',
+    date: '2026-04-06',
+    views: '880',
+    description: '拆解 Agent Demo 的 PySide6 桌面端、FastAPI 服务、LangGraph 运行时、Everything 检索和隔离区清理流程。',
+    tags: ['Agent Demo', 'Python', 'PySide6', 'FastAPI', 'LangGraph', 'Everything'],
+    theme: 'code',
+    sections: [
+      {
+        id: 'experience',
+        title: '核心体验',
+        body: 'Agent Demo 面向 Windows 本地文件检索、文件审查和安全清理。桌面客户端是主体验，提供 Assistant、Quick Cleanup、Quarantine 和 Settings 四个区域。',
+      },
+      {
+        id: 'retrieval',
+        title: '文件检索',
+        body: '项目优先通过 Everything 的 es.exe 做全局文件检索，未配置 es.exe 时回退到文件系统扫描。Everything 路径可通过 EVERYTHING_ES_PATH 配置。',
+      },
+      {
+        id: 'runtime',
+        title: '运行时',
+        body: '桌面端使用 PySide6，API 服务使用 FastAPI 并复用 LangGraph runtime。API 端点包含 /chat、/session/{session_id}、/health、/skills、/mcp/servers 和 /documents/ingest。',
+      },
+    ],
+  },
+  {
+    id: 'agent-demo-safe-cleanup',
+    title: 'Agent Demo 安全清理与隔离区工作流',
+    project: 'Agent Demo',
+    category: '安全清理',
+    date: '2026-04-05',
+    views: '790',
+    description: '整理 Agent Demo 的保守清理模型：检索候选、生成报告、移动到隔离区、支持恢复，避免默认直接删除。',
+    tags: ['Agent Demo', '文件清理', '隔离区', 'DeepSeek', 'MCP', 'RAG'],
+    theme: 'memory',
+    sections: [
+      {
+        id: 'cleanup-model',
+        title: '保守清理模型',
+        body: '项目的清理流程是检索候选、审查并总结、导出或检查清理计划、把确认项移动到隔离区、必要时从隔离区恢复。直接删除不是默认路径。',
+      },
+      {
+        id: 'settings',
+        title: '设置能力',
+        body: 'Settings 支持配置 DeepSeek API key、模型提供方、base URL、Everything 路径、HTTP 模式和中英文 UI 语言。保存语言设置后 UI 会立即刷新。',
+      },
+      {
+        id: 'limits',
+        title: '限制边界',
+        body: '桌面客户端是当前最完整路径；API runtime 依赖 Redis、PostgreSQL 和 pgvector；RAG 与 embedding 依赖配置的模型提供商；文件系统 fallback 比 Everything 慢。',
+      },
+    ],
+  },
 ];
 
 const categoryIcons: Record<string, JSX.Element> = {
@@ -518,6 +686,36 @@ const projects: Project[] = [
     highlights: ['Gateway 统一公网入口', 'JWT 与内部 HMAC 信任链', 'Local Transaction + Outbox 一致性', 'RocketMQ 幂等消费', 'Cache-Aside 延迟双删', 'Elasticsearch 商品与店铺搜索'],
     modules: ['gateway', 'auth-service', 'user-service', 'order-service', 'product-service', 'stock-service', 'payment-service', 'search-service', 'governance-service', 'my-shop-uniapp'],
     color: 'blue',
+  },
+  {
+    name: 'blog-web',
+    repo: 'local/Rs/web-backend',
+    url: undefined,
+    summary: '基于 Rust 2024、Axum、SeaORM、PostgreSQL 与 Redis 的社交博客后端，覆盖认证、用户、文章、评论、点赞、关注、通知、标签、搜索和设置。',
+    role: 'Rust 社交博客后端',
+    license: '未提供',
+    stars: '-',
+    forks: '-',
+    commits: '-',
+    stack: ['Rust 2024', 'Axum', 'SeaORM', 'PostgreSQL', 'Redis', 'Docker Compose', 'JWT', 'Full Text Search'],
+    highlights: ['模块化 domains 结构', '启动时自动 SQL 迁移', 'Redis 响应缓存', 'PostgreSQL 全文搜索', '本地 seed 数据生成', 'cargo fmt 与 cargo test 质量检查'],
+    modules: ['auth', 'users', 'posts', 'comments', 'likes', 'follows', 'notifications', 'settings', 'tags', 'search'],
+    color: 'purple',
+  },
+  {
+    name: 'Agent Demo',
+    repo: 'local/Py/agent-demo',
+    url: undefined,
+    summary: '面向 Windows 的本地文件助手，提供文件检索、清理候选分析、隔离区移动与恢复，桌面端基于 PySide6，服务端基于 FastAPI 与 LangGraph runtime。',
+    role: 'Windows 本地 AI 文件助手',
+    license: '未提供',
+    stars: '-',
+    forks: '-',
+    commits: '-',
+    stack: ['Python', 'PySide6', 'FastAPI', 'LangGraph', 'Everything', 'DeepSeek', 'Redis', 'PostgreSQL', 'pgvector'],
+    highlights: ['Everything 全局文件检索', '文件系统扫描 fallback', '预设清理扫描', '隔离区与恢复流程', '中英文 UI 切换', 'MCP 与 skills 可选集成'],
+    modules: ['Assistant', 'Quick Cleanup', 'Quarantine', 'Settings', 'FastAPI Runtime', 'MCP Servers', 'Skills', 'RAG'],
+    color: 'orange',
   },
 ];
 
@@ -1060,10 +1258,14 @@ function ProjectShowcase({ compact = false }: { compact?: boolean }) {
               <span key={item}>{item}</span>
             ))}
           </div>
-          <a href={project.url} target="_blank" rel="noreferrer">
-            查看仓库
-            <ExternalLink size={14} />
-          </a>
+          {project.url ? (
+            <a href={project.url} target="_blank" rel="noreferrer">
+              查看仓库
+              <ExternalLink size={14} />
+            </a>
+          ) : (
+            <span className="local-project-note">本地项目资料</span>
+          )}
         </article>
       ))}
     </div>
@@ -1110,10 +1312,14 @@ function ProjectDetail({ project }: { project: Project }) {
             <span key={module}>{module}</span>
           ))}
         </div>
-        <a className="primary-button repo-button" href={project.url} target="_blank" rel="noreferrer">
-          打开仓库
-          <ExternalLink size={15} />
-        </a>
+        {project.url ? (
+          <a className="primary-button repo-button" href={project.url} target="_blank" rel="noreferrer">
+            打开仓库
+            <ExternalLink size={15} />
+          </a>
+        ) : (
+          <span className="local-project-note large">本地 README 项目，暂未配置公开仓库地址</span>
+        )}
       </aside>
     </article>
   );
@@ -1143,7 +1349,10 @@ function ProjectStats({ project, stacked = false }: { project: Project; stacked?
 function ProjectIcon({ project }: { project: Project }) {
   return (
     <div className={`project-icon ${project.color}`}>
-      {project.color === 'green' ? <Terminal size={23} /> : <Server size={23} />}
+      {project.color === 'green' && <Terminal size={23} />}
+      {project.color === 'blue' && <Server size={23} />}
+      {project.color === 'purple' && <BookOpen size={23} />}
+      {project.color === 'orange' && <FileText size={23} />}
     </div>
   );
 }
