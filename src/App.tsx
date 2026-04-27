@@ -1033,6 +1033,8 @@ function ArticlesPage({
 }
 
 function ArticlePage({ article, openArticle }: { article: Article; openArticle: (article: Article) => void }) {
+  const expandedSections = getExpandedSections(article);
+
   return (
     <section className="page-layout reveal">
       <article className="article-detail">
@@ -1051,23 +1053,27 @@ function ArticlePage({ article, openArticle }: { article: Article; openArticle: 
           {article.description}
         </div>
         <ArticleVisual article={article} />
-        {article.sections.map((section, index) => (
+        {expandedSections.map((section, index) => (
           <section className="article-section" key={section.id}>
             <span className="section-index">{String(index + 1).padStart(2, '0')}</span>
             <h2 id={section.id}>{section.title}</h2>
             <p>{section.body}</p>
           </section>
         ))}
+        <DecisionPanel article={article} />
         <CodeSample article={article} />
+        <ReferencePanel article={article} />
       </article>
       <aside className="side-panel">
         <div className="panel-card">
           <h3>目录</h3>
-          {article.sections.map((section) => (
+          {expandedSections.map((section) => (
             <a key={section.id} href={`#${section.id}`}>
               {section.title}
             </a>
           ))}
+          <a href="#decision">方案取舍</a>
+          <a href="#references">参考资料</a>
         </div>
         <div className="panel-card">
           <h3>相关文章</h3>
@@ -1294,6 +1300,168 @@ function ArticleVisual({ article }: { article: Article }) {
     </div>
   );
 }
+
+function DecisionPanel({ article }: { article: Article }) {
+  const decisions = getDecisionBlocks(article);
+
+  return (
+    <section className="decision-panel" id="decision">
+      <div className="decision-head">
+        <span>Architecture Decision</span>
+        <h2>方案取舍</h2>
+      </div>
+      <div className="decision-grid">
+        {decisions.map((item) => (
+          <article key={item.title}>
+            <strong>{item.title}</strong>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ReferencePanel({ article }: { article: Article }) {
+  const references = getReferenceLinks(article);
+
+  return (
+    <section className="reference-panel" id="references">
+      <h2>参考资料</h2>
+      <div>
+        {references.map((reference) => (
+          <a key={reference.href} href={reference.href} target="_blank" rel="noreferrer">
+            {reference.label}
+            <ExternalLink size={14} />
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function getExpandedSections(article: Article) {
+  const projectSections: Record<string, { id: string; title: string; body: string }[]> = {
+    GinChat: [
+      {
+        id: 'design-choice',
+        title: '我的方案选型',
+        body: 'GinChat 选择单体服务承载 IM 核心链路，是因为项目规模以功能完整和链路清晰为先。HTTP 接口、WebSocket 连接管理、Redis 状态和 PostgreSQL 持久化都在同一个部署单元内，调试成本低，适合先把消息模型、好友关系和群组关系跑通。',
+      },
+      {
+        id: 'alternative',
+        title: '其他可选方案',
+        body: '如果在线用户规模扩大，可以把 WebSocket 网关、消息投递和业务 API 拆成独立服务；如果消息量继续提升，可以引入 Kafka、RocketMQ 或 NATS 做消息缓冲；如果需要多端同步和复杂会话，可以进一步设计会话表、设备表和未读游标表。',
+      },
+    ],
+    'Cloud Shop': [
+      {
+        id: 'design-choice',
+        title: '我的方案选型',
+        body: 'Cloud Shop 选择 Spring Cloud Alibaba + Dubbo + RocketMQ 的组合，是为了把公网入口、领域服务、RPC 调用和异步一致性分层。gateway 处理公网安全和路由，Dubbo 处理内部同步调用，RocketMQ 处理订单、库存、支付和搜索同步这类跨服务副作用。',
+      },
+      {
+        id: 'alternative',
+        title: '其他可选方案',
+        body: '替代方案包括 Spring Cloud OpenFeign 统一 HTTP 内部调用、Kafka 承载事件流、Seata 处理强一致分布式事务、Debezium CDC 同步搜索索引。当前项目选择 Outbox + RocketMQ，是为了控制复杂度并保留失败重放和治理入口。',
+      },
+    ],
+    'blog-web': [
+      {
+        id: 'design-choice',
+        title: '我的方案选型',
+        body: 'blog-web 选择 Rust + Axum + SeaORM，是为了获得类型约束、异步性能和较清晰的领域模块边界。全文搜索直接使用 PostgreSQL，适合博客系统早期阶段减少外部搜索集群维护成本。',
+      },
+      {
+        id: 'alternative',
+        title: '其他可选方案',
+        body: '替代方案包括 Actix Web、Poem、SQLx、Diesel、Elasticsearch 或 Meilisearch。当前选择 Axum 与 SeaORM 更偏向组合式路由和 ORM 实体管理；当搜索权重、分词、聚合和推荐复杂度增加后，再迁移到独立搜索引擎更合理。',
+      },
+    ],
+    'Agent Demo': [
+      {
+        id: 'design-choice',
+        title: '我的方案选型',
+        body: 'Agent Demo 选择 PySide6 作为主体验，是因为文件检索、隔离区和设置项都更适合桌面端交互。FastAPI 和 LangGraph runtime 保留为服务化入口，让后续 MCP、skills 和 RAG 能接入同一套运行时。',
+      },
+      {
+        id: 'alternative',
+        title: '其他可选方案',
+        body: '替代方案包括 Electron、Tauri、纯 Web 控制台、AutoGen 或 CrewAI。当前项目偏向本地文件安全，PySide6 能降低系统权限、文件选择和本机路径交互成本；LangGraph 则适合把检索、审查、计划和隔离区动作显式建模。',
+      },
+    ],
+  };
+
+  return [...article.sections, ...(projectSections[article.project] ?? [])];
+}
+
+function getDecisionBlocks(article: Article) {
+  const common = [
+    {
+      title: '当前选择',
+      body: getChoiceSummary(article),
+    },
+    {
+      title: '替代方案',
+      body: getAlternativeSummary(article),
+    },
+    {
+      title: '落地注意',
+      body: getRiskSummary(article),
+    },
+  ];
+
+  return common;
+}
+
+function getChoiceSummary(article: Article) {
+  if (article.project === 'GinChat') return 'Go + Gin + GORM + Redis + WebSocket，优先保证 IM 链路闭环、状态清晰和本地部署简单。';
+  if (article.project === 'Cloud Shop') return 'Spring Cloud Alibaba + Dubbo + RocketMQ + Redis + Elasticsearch，按电商主链路拆分同步调用、异步事件和搜索读模型。';
+  if (article.project === 'blog-web') return 'Rust + Axum + SeaORM + PostgreSQL FTS + Redis，把博客读写、搜索和缓存控制在一个轻量后端里。';
+  return 'PySide6 桌面端 + FastAPI 服务端 + LangGraph runtime，优先保障本地文件操作的可控性和可恢复性。';
+}
+
+function getAlternativeSummary(article: Article) {
+  if (article.project === 'GinChat') return '可替换为独立 WebSocket 网关、Kafka/RocketMQ 消息总线、MongoDB 消息存储或分布式在线状态中心。';
+  if (article.project === 'Cloud Shop') return '可替换为 OpenFeign、Kafka、Seata、Debezium CDC、Meilisearch 或更轻量的单体模块化架构。';
+  if (article.project === 'blog-web') return '可替换为 Actix Web、SQLx、Diesel、Meilisearch、Elasticsearch 或独立 CQRS 读模型。';
+  return '可替换为 Electron、Tauri、纯 Web 控制台、AutoGen、CrewAI 或直接使用 Everything HTTP API。';
+}
+
+function getRiskSummary(article: Article) {
+  if (article.project === 'GinChat') return '核心风险是连接扩容、消息顺序、离线补偿和 Redis 状态过期，需要后续补多节点连接路由和消息投递确认。';
+  if (article.project === 'Cloud Shop') return '核心风险是热点库存、Outbox 积压、MQ 重试风暴、缓存脏读和支付终态污染，需要治理台和压测脚本持续覆盖。';
+  if (article.project === 'blog-web') return '核心风险是全文搜索性能、缓存失效策略、迁移脚本回滚和 Rust 编译迭代成本，需要围绕查询基线持续测试。';
+  return '核心风险是误判清理候选和误删文件，因此默认隔离而非删除，并保留审查、报告和恢复路径。';
+}
+
+function getReferenceLinks(article: Article) {
+  if (article.project === 'GinChat') {
+    return [
+      { label: 'Redis SETNX command', href: 'https://redis.io/docs/latest/commands/setnx/' },
+      { label: 'Gorilla WebSocket repository', href: 'https://github.com/gorilla/websocket' },
+    ];
+  }
+  if (article.project === 'Cloud Shop') {
+    return [
+      { label: 'Spring Cloud Gateway reference', href: 'https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/' },
+      { label: 'Apache RocketMQ Transaction Message', href: 'https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/' },
+      { label: 'Apache RocketMQ Message Model', href: 'https://rocketmq.apache.org/docs/domainModel/04message/' },
+    ];
+  }
+  if (article.project === 'blog-web') {
+    return [
+      { label: 'Axum State extractor', href: 'https://docs.rs/axum/latest/axum/extract/struct.State.html' },
+      { label: 'SeaORM migration guide', href: 'https://www.sea-ql.org/SeaORM/docs/migration/writing-migration/' },
+      { label: 'PostgreSQL text search indexes', href: 'https://www.postgresql.org/docs/current/textsearch-indexes.html' },
+    ];
+  }
+  return [
+    { label: 'FastAPI documentation', href: 'https://fastapi.tiangolo.com/' },
+    { label: 'LangGraph workflows and agents', href: 'https://docs.langchain.com/oss/python/langgraph/workflows-agents' },
+  ];
+}
+
 
 function CodeSample({ article }: { article: Article }) {
   const snippet = article.code ?? getArticleCode(article);
