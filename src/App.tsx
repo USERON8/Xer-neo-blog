@@ -1,4 +1,4 @@
-import {
+﻿import {
   BookOpen,
   CalendarDays,
   ChevronRight,
@@ -295,23 +295,196 @@ client.WritePump()`,
       },
     ],
   },
+  {
+    id: 'cloud-service-boundary',
+    title: 'Cloud Shop 服务边界与路由归属',
+    project: 'Cloud Shop',
+    category: '服务边界',
+    date: '2026-04-16',
+    views: '1.2k',
+    description: '基于 backend-api、backend-runtime 与各服务 README，整理 gateway 到各领域服务的路由归属和职责边界。',
+    tags: ['Cloud Shop', 'Gateway', '服务边界', '路由归属', 'Dubbo'],
+    theme: 'algorithm',
+    sections: [
+      {
+        id: 'gateway-owner',
+        title: '公网入口',
+        body: 'Cloud Shop 明确要求公网 HTTP 流量只进入 gateway。gateway 负责 JWT 校验、内部身份 Header 注入、HMAC 转发、限流和降级兜底。',
+      },
+      {
+        id: 'route-map',
+        title: '路由归属',
+        body: '/auth 与 /oauth2 归属 auth-service；用户、地址、商家和管理员基础域归属 user-service；商品、分类、SPU、SKU 归属 product-service；订单、购物车和售后归属 order-service；支付、退款、checkout 和回调归属 payment-service；搜索与店铺发现归属 search-service；治理类后台入口归属 governance-service。',
+      },
+      {
+        id: 'boundary-rule',
+        title: '边界规则',
+        body: '内部业务调用优先使用 Dubbo RPC。控制器不写 try-catch，异常由 common-web、common-security 和服务兜底切面统一处理。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-frontend-api-chain',
+    title: 'Cloud Shop UniApp 前端 API 链路',
+    project: 'Cloud Shop',
+    category: '前端接口',
+    date: '2026-04-15',
+    views: '960',
+    description: '根据 frontend-api 梳理 UniApp 的登录、购物车、下单、支付、后台治理和上传链路。',
+    tags: ['Cloud Shop', 'UniApp', 'Frontend API', '购物车', '支付链路'],
+    theme: 'code',
+    sections: [
+      {
+        id: 'session',
+        title: '会话规则',
+        body: 'src/api/http.ts 会在存在会话时自动附加 bearer token。前端身份来自 src/auth/session.ts 解析 JWT claims，角色归一为 USER、MERCHANT 或 ADMIN，最终授权仍以后端为准。',
+      },
+      {
+        id: 'checkout',
+        title: '购物车下单',
+        body: '前端通过 /api/users/me/cart 读取或更新远程购物车，创建订单时使用服务端返回的 cartId，并同时携带 Idempotency-Key 与 clientOrderId。',
+      },
+      {
+        id: 'payment',
+        title: '支付链路',
+        body: '支付流程是创建 payment order、创建 checkout session、打开 session.checkoutPath、轮询支付状态。前端不手写 checkout URL，因为 /api/payment-checkouts/{ticket} 返回的是原始 HTML。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-order-stock-payment',
+    title: 'Cloud Shop 订单、库存与支付协作链路',
+    project: 'Cloud Shop',
+    category: '交易链路',
+    date: '2026-04-14',
+    views: '1.4k',
+    description: '结合 order-service、stock-service、payment-service 文档，拆解下单、库存预占、支付成功和超时取消。',
+    tags: ['Cloud Shop', 'Order Service', 'Stock Service', 'Payment Service', '交易链路'],
+    theme: 'network',
+    sections: [
+      {
+        id: 'order',
+        title: '订单创建',
+        body: 'order-service 拥有购物车快照、订单创建、取消、发货、完成和售后动作。POST /api/orders 要求 Idempotency-Key、clientOrderId 和服务端 cartId。',
+      },
+      {
+        id: 'stock',
+        title: '库存协作',
+        body: 'stock-service 负责库存预占、确认、释放、恢复和流水查询。热点库存行锁通过 stock_segment 降低争抢，并用 Redis 摘要缓存和 Lua 预检查加速可用库存判断。',
+      },
+      {
+        id: 'payment',
+        title: '支付协作',
+        body: 'payment-service 负责支付单、checkout session、退款和支付回调。支付成功和退款完成通过 outbox relay 发布事件，订单侧消费后推进状态。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-product-search-sync',
+    title: 'Cloud Shop 商品域与搜索索引同步',
+    project: 'Cloud Shop',
+    category: '搜索系统',
+    date: '2026-04-13',
+    views: '910',
+    description: '从 product-service 和 search-service 的职责出发，说明商品、分类、库存信号如何进入 Elasticsearch 搜索视图。',
+    tags: ['Cloud Shop', 'Product Service', 'Search Service', 'Elasticsearch', '索引同步'],
+    theme: 'algorithm',
+    sections: [
+      {
+        id: 'product-source',
+        title: '商品源头',
+        body: 'product-service 拥有 product、SKU、SPU 和 category 数据，是商品与分类形态的事实来源。商品详情热点读取使用 ProductDetailCacheService 的多级缓存路径。',
+      },
+      {
+        id: 'search-read',
+        title: '搜索读取',
+        body: 'search-service 承接商品搜索、店铺搜索、建议词和推荐接口，搜索文档由 Elasticsearch 承载，热词和热销商品 ID 由 Redis 管理。',
+      },
+      {
+        id: 'freshness',
+        title: '索引新鲜度',
+        body: '索引新鲜度依赖商品、分类、库存等上游同步信号和定时重建路径。搜索侧以最终一致视图换取查询性能和浏览体验。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-observability-governance',
+    title: 'Cloud Shop 可观测性与治理入口',
+    project: 'Cloud Shop',
+    category: '可观测性',
+    date: '2026-04-12',
+    views: '1.0k',
+    description: '基于 observability-stack 与 governance-service，整理 SkyWalking、Prometheus、Grafana、MQ 和 Outbox 治理入口。',
+    tags: ['Cloud Shop', 'SkyWalking', 'Prometheus', 'Grafana', 'Governance', 'Outbox'],
+    theme: 'memory',
+    sections: [
+      {
+        id: 'stack',
+        title: '监控组件',
+        body: '本地可观测性包含 SkyWalking OAP/UI、Prometheus、Grafana、Redis Exporter、MySQL Exporter、Nginx Exporter、Elasticsearch Exporter 和 Blackbox Exporter。',
+      },
+      {
+        id: 'watch',
+        title: '观测重点',
+        body: 'SkyWalking 关注 HTTP、Dubbo 拓扑、Redis/JDBC/MyBatis span 和慢 SQL；Prometheus/Grafana 关注服务 up、吞吐、延迟、Redis/MySQL 负载、Nginx 请求率、Elasticsearch 健康、outbox backlog 与 MQ consumer lag。',
+      },
+      {
+        id: 'governance',
+        title: '治理入口',
+        body: 'governance-service 统一暴露 /api/admin/mq、/api/admin/outbox、/api/admin/observability、/api/admin/thread-pools、/api/admin/statistics 等后台治理路由。',
+      },
+    ],
+  },
+  {
+    id: 'cloud-dev-startup-test',
+    title: 'Cloud Shop 本地启动与测试脚本索引',
+    project: 'Cloud Shop',
+    category: '工程效率',
+    date: '2026-04-11',
+    views: '870',
+    description: '整理 dev-startup 与 TEST_SCRIPT_INDEX 中的启动脚本、监控开关、日志路径、契约检查和 k6 压测入口。',
+    tags: ['Cloud Shop', 'Dev Startup', 'Smoke Test', 'k6', '契约检查'],
+    theme: 'code',
+    sections: [
+      {
+        id: 'startup',
+        title: '启动入口',
+        body: '推荐使用 scripts/dev/start-platform.* --with-monitoring 一次性启动基础设施、监控和 Java 服务。也可以用 --skip-containers、--skip-services、--services、--dry-run 等参数拆分流程。',
+      },
+      {
+        id: 'logs',
+        title: '日志位置',
+        body: '进程 stdout/stderr 写入 .tmp/service-runtime/<service>/，服务滚动日志位于 services/<service>/logs/，模块目录不可写时回退到 .tmp/service-runtime/<service>/app-logs/。',
+      },
+      {
+        id: 'tests',
+        title: '测试入口',
+        body: '契约检查使用 scripts/tools/check-api-contract.*，烟测使用 scripts/ci/smoke-local.*，性能测试使用 tests/perf/k6/run-k6.*。当前 k6 场景包含 gateway-route-only、order-create-only、search-chain、search-singleton-max 等。',
+      },
+    ],
+  },
 ];
 
-const categoryMeta: Omit<Category, 'count'>[] = [
-  { name: '实时通讯', icon: <Network size={24} /> },
-  { name: '认证与缓存', icon: <ShieldCheck size={24} /> },
-  { name: '微服务架构', icon: <Server size={24} /> },
-  { name: '消息与一致性', icon: <Workflow size={24} /> },
-  { name: '认证与安全', icon: <Code2 size={24} /> },
-  { name: '缓存设计', icon: <Database size={24} /> },
-  { name: '搜索系统', icon: <Layers3 size={24} /> },
-];
+const categoryIcons: Record<string, JSX.Element> = {
+  实时通讯: <Network size={24} />,
+  认证与缓存: <ShieldCheck size={24} />,
+  微服务架构: <Server size={24} />,
+  消息与一致性: <Workflow size={24} />,
+  认证与安全: <Code2 size={24} />,
+  缓存设计: <Database size={24} />,
+  搜索系统: <Layers3 size={24} />,
+  服务边界: <Server size={24} />,
+  前端接口: <Code2 size={24} />,
+  交易链路: <Workflow size={24} />,
+  可观测性: <ShieldCheck size={24} />,
+  工程效率: <Terminal size={24} />,
+};
 
-const categories: Category[] = categoryMeta.map((item) => ({
-  ...item,
-  count: articles.filter((article) => article.category === item.name).length,
+const categories: Category[] = Array.from(new Set(articles.map((article) => article.category))).map((name) => ({
+  name,
+  count: articles.filter((article) => article.category === name).length,
+  icon: categoryIcons[name] ?? <FileText size={24} />,
 }));
-
 const tags = Array.from(new Set(articles.flatMap((article) => article.tags)));
 
 const projects: Project[] = [
