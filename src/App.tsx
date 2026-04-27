@@ -5,7 +5,9 @@ import {
   ChevronRight,
   Code2,
   Database,
+  ExternalLink,
   FileText,
+  GitFork,
   Github,
   Layers3,
   Mail,
@@ -16,8 +18,10 @@ import {
   Search,
   Server,
   ShieldCheck,
+  Star,
   Sun,
   Terminal,
+  Workflow,
   X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -40,6 +44,23 @@ type Category = {
   name: string;
   count: number;
   icon: JSX.Element;
+};
+
+type Project = {
+  name: string;
+  repo: string;
+  url: string;
+  summary: string;
+  role: string;
+  license: string;
+  stars: string;
+  forks: string;
+  commits: string;
+  issues?: string;
+  stack: string[];
+  highlights: string[];
+  modules: string[];
+  color: 'blue' | 'green';
 };
 
 const articles: Article[] = [
@@ -111,10 +132,38 @@ const tags = [
   '设计模式',
 ];
 
-const projects = [
-  { name: 'TinyWebServer', description: '基于 C++ 与 Linux 的轻量级 Web 服务器，采用 Reactor 网络模型。', stars: '1.2k' },
-  { name: 'MyKVStore', description: '围绕 LSM Tree 设计的轻量级 KV 存储引擎，用于理解数据库底层。', stars: '856' },
-  { name: 'Algo-Notes', description: '整理算法模板、题型分类和面试常见问题的个人笔记库。', stars: '1.1k' },
+const projects: Project[] = [
+  {
+    name: 'GinChat',
+    repo: 'USERON8/ginchat',
+    url: 'https://github.com/USERON8/ginchat',
+    summary: '基于 Go + Gin 构建的单体 IM 即时通讯服务，支持私聊、群聊、好友管理，使用 WebSocket 实现实时消息推送。',
+    role: '实时通讯 IM 后端',
+    license: 'MIT',
+    stars: '1',
+    forks: '0',
+    commits: '4',
+    stack: ['Go', 'Gin', 'GORM', 'PostgreSQL', 'Redis', 'WebSocket', 'JWT', 'Zap', 'Viper', 'Docker Compose'],
+    highlights: ['私聊与群聊实时推送', '好友申请与好友列表', '游标分页历史消息', 'Redis SETNX 消息去重', '在线状态与心跳检测', 'Worker Pool 异步写库'],
+    modules: ['用户模块', '好友模块', '群组模块', '消息模块', '通讯优化', '统一响应'],
+    color: 'green',
+  },
+  {
+    name: 'Cloud Shop Microservices',
+    repo: 'USERON8/cloud',
+    url: 'https://github.com/USERON8/cloud',
+    summary: 'Cloud Shop 是基于 Spring Boot、Spring Cloud Alibaba、Dubbo、RocketMQ、MySQL、Redis、Elasticsearch 与 UniApp 的微服务电商项目。',
+    role: '微服务电商平台',
+    license: 'Apache-2.0',
+    stars: '1',
+    forks: '0',
+    commits: '1,186',
+    issues: '8',
+    stack: ['Spring Boot', 'Spring Cloud Alibaba', 'Dubbo', 'RocketMQ', 'MySQL', 'Redis', 'Elasticsearch', 'UniApp', 'Nacos', 'Docker'],
+    highlights: ['Gateway 统一公网入口', 'JWT 与内部 HMAC 信任链', 'Local Transaction + Outbox 一致性', 'RocketMQ 幂等消费', 'Cache-Aside 延迟双删', 'Elasticsearch 商品与店铺搜索'],
+    modules: ['gateway', 'auth-service', 'user-service', 'order-service', 'product-service', 'stock-service', 'payment-service', 'search-service', 'governance-service', 'my-shop-uniapp'],
+    color: 'blue',
+  },
 ];
 
 const navItems: { label: string; page: Page }[] = [
@@ -300,6 +349,11 @@ function HomePage({ navigate, openArticle }: { navigate: (page: Page) => void; o
         <TagCloud tags={tags} />
       </section>
 
+      <section className="content-section reveal delay-4">
+        <SectionHeading title="真实项目" action="查看项目" onClick={() => navigate('projects')} />
+        <ProjectShowcase compact />
+      </section>
+
       <section className="learning-banner reveal delay-4">
         <div className="rocket-badge">
           <Rocket size={42} />
@@ -462,22 +516,39 @@ function TagsPage() {
 }
 
 function ProjectsPage() {
+  const [activeProject, setActiveProject] = useState<Project>(projects[0]);
+
   return (
     <section className="simple-page reveal">
       <Breadcrumb current="项目" />
-      <h1>项目</h1>
-      <div className="project-grid">
+      <div className="project-hero">
+        <div>
+          <p className="eyebrow">GitHub 真实项目沉淀</p>
+          <h1>项目</h1>
+          <p>这里展示当前公开仓库中最能体现后端工程能力的两个项目：一个聚焦实时通讯链路，一个覆盖微服务电商全链路。</p>
+        </div>
+        <a className="github-link" href="https://github.com/USERON8" target="_blank" rel="noreferrer">
+          <Github size={18} />
+          访问 GitHub
+          <ExternalLink size={15} />
+        </a>
+      </div>
+      <div className="project-grid rich">
         {projects.map((project) => (
-          <article className="project-card" key={project.name}>
-            <div className="project-icon">
-              <Terminal size={23} />
-            </div>
+          <button
+            className={`project-card ${activeProject.name === project.name ? 'active' : ''} ${project.color}`}
+            key={project.name}
+            onClick={() => setActiveProject(project)}
+          >
+            <ProjectIcon project={project} />
+            <span className="project-role">{project.role}</span>
             <h2>{project.name}</h2>
-            <p>{project.description}</p>
-            <span>{project.stars} 星标</span>
-          </article>
+            <p>{project.summary}</p>
+            <ProjectStats project={project} />
+          </button>
         ))}
       </div>
+      <ProjectDetail project={activeProject} />
     </section>
   );
 }
@@ -498,9 +569,9 @@ function AboutPage({ navigate }: { navigate: (page: Page) => void }) {
       </div>
       <div className="about-content">
         <h2>个人介绍</h2>
-        <p>本站用于记录 CS 基础、后端工程实践和项目复盘。当前版本是纯静态前端，已按 GitHub Pages 托管方式配置。</p>
+        <p>本站用于记录 CS 基础、后端工程实践和项目复盘。当前重点项目包括 GinChat 实时通讯服务与 Cloud Shop 微服务电商系统。</p>
         <h2>技术栈</h2>
-        <TagCloud tags={['C/C++', 'Python', 'Java', 'Linux', 'MySQL', 'Git', '计算机网络', '算法', '操作系统']} />
+        <TagCloud tags={['Go', 'Gin', 'Java', 'Spring Cloud Alibaba', 'Dubbo', 'RocketMQ', 'Redis', 'MySQL', 'Elasticsearch', 'UniApp']} />
         <button className="primary-button" onClick={() => navigate('projects')}>
           查看项目
         </button>
@@ -559,6 +630,113 @@ function SectionHeading({ title, action, onClick }: { title: string; action: str
         {action}
         <ChevronRight size={16} />
       </button>
+    </div>
+  );
+}
+
+function ProjectShowcase({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={`project-showcase ${compact ? 'compact' : ''}`}>
+      {projects.map((project) => (
+        <article className={`project-feature ${project.color}`} key={project.name}>
+          <div className="project-feature-head">
+            <ProjectIcon project={project} />
+            <div>
+              <span>{project.role}</span>
+              <h3>{project.name}</h3>
+            </div>
+          </div>
+          <p>{project.summary}</p>
+          <ProjectStats project={project} />
+          <div className="mini-stack">
+            {project.stack.slice(0, compact ? 5 : 8).map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+          <a href={project.url} target="_blank" rel="noreferrer">
+            查看仓库
+            <ExternalLink size={14} />
+          </a>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ProjectDetail({ project }: { project: Project }) {
+  return (
+    <article className="project-detail">
+      <div className="project-detail-main">
+        <div className="project-detail-title">
+          <ProjectIcon project={project} />
+          <div>
+            <span>{project.repo}</span>
+            <h2>{project.name}</h2>
+          </div>
+        </div>
+        <p>{project.summary}</p>
+        <div className="detail-block">
+          <h3>技术栈</h3>
+          <div className="mini-stack">
+            {project.stack.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        </div>
+        <div className="detail-block">
+          <h3>能力覆盖</h3>
+          <div className="highlight-grid">
+            {project.highlights.map((item) => (
+              <span key={item}>
+                <ShieldCheck size={15} />
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <aside className="project-detail-side">
+        <ProjectStats project={project} stacked />
+        <div className="module-list">
+          <h3>模块结构</h3>
+          {project.modules.map((module) => (
+            <span key={module}>{module}</span>
+          ))}
+        </div>
+        <a className="primary-button repo-button" href={project.url} target="_blank" rel="noreferrer">
+          打开仓库
+          <ExternalLink size={15} />
+        </a>
+      </aside>
+    </article>
+  );
+}
+
+function ProjectStats({ project, stacked = false }: { project: Project; stacked?: boolean }) {
+  return (
+    <div className={`project-stats ${stacked ? 'stacked' : ''}`}>
+      <span>
+        <Star size={14} />
+        {project.stars} Star
+      </span>
+      <span>
+        <GitFork size={14} />
+        {project.forks} Fork
+      </span>
+      <span>
+        <Workflow size={14} />
+        {project.commits} Commits
+      </span>
+      {project.issues && <span>{project.issues} Issues</span>}
+      <span>{project.license}</span>
+    </div>
+  );
+}
+
+function ProjectIcon({ project }: { project: Project }) {
+  return (
+    <div className={`project-icon ${project.color}`}>
+      {project.color === 'green' ? <Terminal size={23} /> : <Server size={23} />}
     </div>
   );
 }
